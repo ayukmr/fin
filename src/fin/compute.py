@@ -115,9 +115,9 @@ def write(points):
         'diluted_shares': 'Diluted Shares',
         'eps_diluted':    'Earning per FDS',
 
-        'operating_cash_flow': 'Operating Cashflow',
+        'operating_cash_flow':  'Operating Cashflow',
         'capital_expenditures': 'Capital Expenditure',
-        'free_cash_flow': 'Free Cashflow'
+        'free_cash_flow':       'Free Cashflow'
     }
 
     out = sorted(
