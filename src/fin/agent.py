@@ -21,6 +21,9 @@ STATS = {
     'net_income',
     'diluted_shares',
     'eps_diluted',
+    'operating_cash_flow',
+    'capital_expenditures',
+    'free_cash_flow'
 }
 
 def run(facts, computed):
@@ -68,8 +71,8 @@ Guidance:
     - Remember, `search_fact_keys` works on partial queries. It just checks if the query is within the keys returned.
     - If no keys are being returned when trying a `search_fact_keys` search, try changing the query to a different thing.
     - If all else doesn't work, just resort to using `all_fact_keys` in order to find a good key to use.
-- get_fact_* and get_computed represent two different data sources.
-    - The sources use DIFFERENT keys. Do NOT query get_fact_pts using a key from the computed data.
+- `...fact...` and `...computed...` represent two different data sources.
+    - The sources use DIFFERENT keys. Do NOT query `get_fact_pts` using a key from the computed data.
     - The normal facts are sourced from the SEC filing data.
     - The computed data is calculated directly based on the SEC filing data.
     - Both sources are trustworthy, but the computed is more condensed.

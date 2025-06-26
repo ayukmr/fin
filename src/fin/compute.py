@@ -21,12 +21,15 @@ def gen_points(data):
         'operating_income': 'OperatingIncomeLoss',
 
         'depreciation': 'Depreciation',
-        'd_and_a': 'DepreciationDepletionAndAmortization',
+        'd_and_a':      'DepreciationDepletionAndAmortization',
 
         'net_income': 'NetIncomeLoss',
 
         'diluted_shares': ('WeightedAverageNumberOfDilutedSharesOutstanding', 'shares'),
-        'eps_diluted':    ('EarningsPerShareDiluted', 'USD/shares')
+        'eps_diluted':    ('EarningsPerShareDiluted', 'USD/shares'),
+
+        'operating_cash_flow':  'NetCashProvidedByUsedInOperatingActivities',
+        'capital_expenditures': 'PaymentsToAcquirePropertyPlantAndEquipment'
     }
 
     points = defaultdict(dict)
@@ -50,7 +53,14 @@ def gen_points(data):
     return points
 
 def add_q4(points):
-    no_add = {'d_and_a', 'diluted_shares', 'eps_diluted'}
+    no_add = {
+        'd_and_a',
+        'diluted_shares',
+        'eps_diluted',
+        'operating_cash_flow',
+        'capital_expenditures',
+        'free_cash_flow'
+    }
 
     for fx, data in list(points.items()):
         if fx[2:] == 'FY':
@@ -78,6 +88,9 @@ def compute_higher_stats(points):
         if {'operating_income', 'depreciation', 'amortization'} <= data.keys():
             data['ebitda'] = data['operating_income'] + data['depreciation'] + data['amortization']
 
+        if {'operating_cash_flow', 'capital_expenditures'} <= data.keys():
+            data['free_cash_flow'] = data['operating_cash_flow'] - data['capital_expenditures']
+
 def write(points):
     names = {
         'revenue': 'Revenue',
@@ -100,7 +113,11 @@ def write(points):
         'net_income': 'Net Income',
 
         'diluted_shares': 'Diluted Shares',
-        'eps_diluted':    'Earning per FDS'
+        'eps_diluted':    'Earning per FDS',
+
+        'operating_cash_flow': 'Operating Cashflow',
+        'capital_expenditures': 'Capital Expenditure',
+        'free_cash_flow': 'Free Cashflow'
     }
 
     out = sorted(
