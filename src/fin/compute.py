@@ -1,5 +1,5 @@
 import csv
-from collections import defaultdict, Counter
+from collections import defaultdict
 
 def compute(data):
     points = gen_points(data)
@@ -35,8 +35,6 @@ def gen_points(data):
     points = defaultdict(dict)
 
     for stat, v in stats.items():
-        fact_pts = []
-
         if type(v) == tuple:
             key, unit = v
             fact_pts = get_fact_pts(data, key, unit=unit)
@@ -64,31 +62,42 @@ def add_q4(points):
 
     for fx, data in list(points.items()):
         if fx[2:] == 'FY':
-            other = [d for f, d in points.items() if f[2:] != 'FY' and f[:2] == fx[:2]]
-            summed = sum([Counter(d) for d in other], Counter())
+            other = [
+                d for f, d in points.items()
+                if f[2:] != 'FY' and f[:2] == fx[:2]
+            ]
 
-            points[fx[:2] + 'Q4'] = {
-                k: data[k] if k in no_add else data[k] - summed[k]
-                for k in data
-            }
+            q4 = fx[:2] + 'Q4'
+
+            for k in data:
+                if k in no_add:
+                    points[q4][k] = data[k]
+                    continue
+
+                os = [o[k] for o in other if k in o]
+
+                if len(os) == 3:
+                    points[q4][k] = data[k] - sum(os)
 
             del points[fx]
 
 def compute_higher_stats(points):
     for data in points.values():
-        if {'revenue', 'cogs'} <= data.keys():
+        keys = data.keys()
+
+        if {'revenue', 'cogs'} <= keys:
             data['gross_profit'] = data['revenue'] - data['cogs']
 
-        if {'r_and_d', 's_and_m', 'g_and_a'} <= data.keys():
+        if {'r_and_d', 's_and_m', 'g_and_a'} <= keys:
             data['operating_expenses'] = data['r_and_d'] + data['s_and_m'] + data['g_and_a']
 
-        if {'d_and_a', 'depreciation'} <= data.keys():
+        if {'d_and_a', 'depreciation'} <= keys:
             data['amortization'] = data['d_and_a'] - data['depreciation']
 
-        if {'operating_income', 'depreciation', 'amortization'} <= data.keys():
+        if {'operating_income', 'depreciation', 'amortization'} <= keys:
             data['ebitda'] = data['operating_income'] + data['depreciation'] + data['amortization']
 
-        if {'operating_cash_flow', 'capital_expenditures'} <= data.keys():
+        if {'operating_cash_flow', 'capital_expenditures'} <= keys:
             data['free_cash_flow'] = data['operating_cash_flow'] - data['capital_expenditures']
 
 def write(points):
@@ -126,7 +135,7 @@ def write(points):
         reverse=True
     )
 
-    years = [None] + [f for f, _ in out]
+    cols = [None] + [f for f, _ in out]
     rotated = [
         [names[key]] + [
             str(d[key]) if key in d else None
@@ -138,7 +147,7 @@ def write(points):
     with open('out.csv', 'w') as f:
         writer = csv.writer(f)
 
-        writer.writerow(years)
+        writer.writerow(cols)
         writer.writerows(rotated)
 
 def get_fact_pts(data, key, unit='USD'):

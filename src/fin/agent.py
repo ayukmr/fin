@@ -80,6 +80,7 @@ Guidance:
     - However, NEVER generate or hallucinate false values.
     - Only use the `compute` tool for doing math on values.
 - Treat '~' as a last resort—derive or deduce whenever feasible.
+- Try to do as much as possible at once, as you have a maximum number of steps.
 
 Do not output anything. Just fill in the data using the tools provided."""
 
