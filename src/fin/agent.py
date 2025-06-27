@@ -158,11 +158,12 @@ def search_fact_keys(query: str) -> list[str]:
     return [k for k in keys if query.lower() in k.lower()]
 
 @function_tool
-def get_fact_pts(key: str) -> Optional[dict[str, float]]:
+def get_fact_pts(key: str, fy_summed: bool) -> Optional[dict[str, float]]:
     """Read the points for a given fact key from the SEC filing data.
 
     Args:
-        key: A valid fact key in the SEC filing data."""
+        key: A valid fact key in the SEC filing data.
+        fy_summed: Whether the financial year value for this key is the sum of the values of the quarters. For example, Revenue is True, but WeightedAverageNumberOfDilutedSharesOutstanding is False."""
 
     data = FACTS['facts']['us-gaap'].get(key)
 
@@ -182,6 +183,23 @@ def get_fact_pts(key: str) -> Optional[dict[str, float]]:
 
         if fy and fp:
             points[str(fy)[2:] + fp] = fact['val']
+
+    for fx, val in list(points.items()):
+        if fx[2:] == 'FY':
+            q4 = fx[:2] + 'Q4'
+
+            if fy_summed:
+                other = [
+                    d for f, d in points.items()
+                    if f[2:] != 'FY' and f[:2] == fx[:2]
+                ]
+
+                if len(other) == 3:
+                    points[q4] = val - sum(other)
+                    del points[fx]
+            else:
+                points[q4] = val
+                del points[fx]
 
     return points
 
